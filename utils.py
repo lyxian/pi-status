@@ -6,7 +6,7 @@
 # Useful APIs :
 # - retrieve all sheets > .worksheets()
 # - get sheet records > .get_all_records()
-# - update summary sheet
+# - update summary sheet (.acell/.arange: notation) (.cell/.range: row, col)
 # - .
 
 from oauth2client.service_account import ServiceAccountCredentials
@@ -17,8 +17,9 @@ import os
 
 ### CONSTANTS ###
 SHEET_COLUMNS = ['number', 'physical', 'hostname', 'address', 'last ping', 'status']
-SHEET_NUM_ROWS = 20
-SHEET_NUM_COLS = 60
+SHEET_NUM_ROWS = 2
+SHEET_NUM_COLS = 6
+SHEET_PING_TIMEOUT = 2
 
 def getDecrypted(secretKey):
     # check if secretKey exists
@@ -77,7 +78,7 @@ def generatePayload(number, name, now):
     hostname, physical, address = name.split('_')
     return [
         SHEET_COLUMNS,
-        [number, physical+'   ', hostname+'   ', address, now, 'ok']
+        [number, physical+'   ', hostname+'   ', address, now, f'=if(E{SHEET_NUM_ROWS} > now()-time(0, {SHEET_PING_TIMEOUT}, 0), "ok", "no")']
     ]
 
 def autoResizeColumn(wb, sheet):
@@ -93,3 +94,95 @@ def autoResizeColumn(wb, sheet):
             }
         }]
     })
+
+def checkRequiredConditionalFormat(wb):
+    summarySheet = next(filter(lambda x: x['properties']['title'] == 'Summary', wb.fetch_sheet_metadata()['sheets']))
+    if 'conditionalFormats' in summarySheet:
+        checkValues = [conditonalFormat['booleanRule']['condition']['values'][0]['userEnteredValue'] for conditonalFormat in summarySheet['conditionalFormats']]
+        if {'no', 'ok'} == set(checkValues):
+            return True
+    return False
+
+def addConditionalFormatting(wb, sheet):
+    formatRange = {
+        "sheetId": sheet._properties['sheetId'],
+        "startRowIndex": 1,
+        "endRowIndex": 100,
+        "startColumnIndex": 5,
+        "endColumnIndex": 6,
+    }
+    # check if conditional format exists
+    if checkRequiredConditionalFormat(wb):
+        print('no need to add conditional formatting')
+        return
+    print('adding conditional formatting')
+    wb.batch_update({
+        "requests": [{
+            "addConditionalFormatRule": {
+                "rule": {
+                    "ranges": [formatRange],
+                    "booleanRule": {
+                        "condition": {
+                            "type": "TEXT_EQ",
+                            "values": [
+                                {
+                                    "userEnteredValue": "ok"
+                                }
+                            ]
+                        },
+                        "format": {
+                            "backgroundColor": {
+                                "red": 0.4,
+                                "green": 1,
+                                "blue": 0.4,
+                            }
+                        }
+                    }
+                },
+                "index": 0
+            }
+        }, {
+            "addConditionalFormatRule": {
+                "rule": {
+                    "ranges": [formatRange],
+                    "booleanRule": {
+                        "condition": {
+                            "type": "TEXT_EQ",
+                            "values": [
+                                {
+                                    "userEnteredValue": "no"
+                                }
+                            ],
+                        },
+                        "format": {
+                            "backgroundColor": {
+                                "red": 1,
+                                "green": 0.4,
+                                "blue": 0.4,
+                            }
+                        }
+                    }
+                },
+                "index": 1
+            }
+        }]
+    })
+
+# update A2-F2
+def updateSummary(wb, name):
+    summarySheet = newWorksheet(wb, 'Summary')
+    # check for existing entries
+    records = summarySheet.get_all_records()
+    if len(records):
+        if name in map(lambda x: x['physical'].strip(), records):
+            print(f'record exists for {name}')
+            return summarySheet
+        cellRange = f'A{SHEET_NUM_ROWS+1}:F{SHEET_NUM_ROWS+1}'
+    else:
+        cellRange = f'A{SHEET_NUM_ROWS}:F{SHEET_NUM_ROWS}'
+    print(f'creating new record for {name}')
+    cells = summarySheet.range(cellRange)
+    for cell in cells:
+        cell.value = f"=OFFSET('{name}'!{cell.address}, -{len(records)}, 0)"
+    summarySheet.update_cells(cells, value_input_option='USER_ENTERED')
+    return summarySheet

@@ -14,6 +14,9 @@ Requirements:
   - create new sheet if not existing
     - use simple sheet / template
   - update summary sheet
+    - collate then update
+    - update individually
+    - link to sheet cells
   - .
 - Misc :
   - update config-init.sh to :
