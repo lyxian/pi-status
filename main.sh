@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[ -d .venv ] && . .venv/bin/activate
+
 if [[ ! `env | grep SECRET_` ]]; then
     set -a
     [ -f .env ] && source .env && echo '.env loaded'
