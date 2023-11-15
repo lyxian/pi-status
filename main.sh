@@ -1,6 +1,7 @@
 #!/bin/bash
 
-date
+echo -e "\n`date`"
+
 [ -d .venv ] && . .venv/bin/activate
 
 if [[ ! `env | grep SECRET_` ]]; then
