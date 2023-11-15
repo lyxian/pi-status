@@ -16,8 +16,8 @@ physical=`cmd.exe /c netsh wlan show interfaces | grep Physical | sed 's/.*: \(.
 address=`cmd.exe /c netsh interface ip show address "Wi-Fi" | grep "IP A" | sed 's/.*: *\(.*\)/\1/' | sed 's/.$//'`
 else
 # linux
-physical=`ifconfig -a wlan0 | grep 'ether ' | sed 's/.*ether \([^ ]*\) .*/\1/' | tr a-z A-Z`
-address=`ifconfig -a wlan0 | grep 'inet ' | sed 's/.*inet \([^ ]*\) .*/\1/'`
+physical=`/usr/sbin/ifconfig -a wlan0 | grep 'ether ' | sed 's/.*ether \([^ ]*\) .*/\1/' | tr a-z A-Z`
+address=`/usr/sbin/ifconfig -a wlan0 | grep 'inet ' | sed 's/.*inet \([^ ]*\) .*/\1/'`
 fi
 
 uid=`hostname`_${physical}_${address}
