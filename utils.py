@@ -177,7 +177,7 @@ def updateSummary(wb, name):
         if name in map(lambda x: x['physical'].strip(), records):
             print(f'record exists for {name}')
             return summarySheet
-        cellRange = f'A{SHEET_NUM_ROWS+1}:F{SHEET_NUM_ROWS+1}'
+        cellRange = f'A{SHEET_NUM_ROWS+len(records)}:F{SHEET_NUM_ROWS+len(records)}'
     else:
         cellRange = f'A{SHEET_NUM_ROWS}:F{SHEET_NUM_ROWS}'
     print(f'creating new record for {name}')
