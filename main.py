@@ -1,5 +1,6 @@
 from utils import getDecrypted, spreadSheetClient, openWorkbookByName, newWorksheet, generatePayload, autoResizeColumn, updateSummary, addConditionalFormatting
 import sys
+import os
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
@@ -8,7 +9,10 @@ if __name__ == '__main__':
     uid, now = sys.argv[1:]
     # now = re.sub(r'\.[^+]*', '', str(pendulum.now()))   # '2023-11-14T01:48:16+08:00'
 
-    workbookName = 'Raspi_Status'
+    workbookName = os.getenv('DATABASE_NAME')
+    if workbookName is None:
+        raise Exception('DATABASE_NAME not defined in env, aborting...')
+        
     client = spreadSheetClient(getDecrypted('SECRET_GOOGLE_JSON'))
     workbook = openWorkbookByName(client, workbookName)
 

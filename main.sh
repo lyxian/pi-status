@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ ! `env | grep SECRET_` ]]; then
+    set -a
+    [ -f .env ] && source .env && echo '.env loaded'
+    set +a
+fi
+
 # check arch >>> uname -a | grep 'WSL' = wsl
 
 if [[ `uname -a | grep 'WSL'` ]]; then
@@ -14,4 +20,4 @@ fi
 
 uid=`hostname`_${physical}_${address}
 
-python tmp.py $uid `date '+%Y-%m-%dT%H:%M:%S'`
+python main.py $uid `date '+%Y-%m-%dT%H:%M:%S'`
