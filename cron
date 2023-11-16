@@ -1,0 +1,1 @@
+*/1 * * * * cd <path/to/pi-status> && bash main.sh >> <path/to/logs> 2>&1
