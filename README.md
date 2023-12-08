@@ -27,7 +27,9 @@ New Features:
 
 - show list of running services
 - daily cleanup of txt file
+- show uptime
 
+```
 ##Packages (list required packages & run .scripts/python-init.sh)
 cryptography==37.0.4
 oauth2client==4.1.3
@@ -38,3 +40,4 @@ pyyaml==6.0
 flask==2.2.2
 pytest==7.1.2
 ##Packages
+```
