@@ -21,7 +21,8 @@ else
 physical=`/usr/sbin/ifconfig -a wlan0 | grep 'ether ' | sed 's/.*ether \([^ ]*\) .*/\1/' | tr a-z A-Z`
 address=`/usr/sbin/ifconfig -a wlan0 | grep 'inet ' | sed 's/.*inet \([^ ]*\) .*/\1/'`
 fi
+runningSince=`uptime -p | cut -d ' ' -f2- | tr -d ' '`
 
-uid=`hostname`_${physical}_${address}
+uid=`hostname`_${physical}_${address}_${runningSince}
 
 python main.py $uid `date '+%Y-%m-%dT%H:%M:%S'`

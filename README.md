@@ -16,7 +16,8 @@ Requirements:
   - update summary sheet
     - collate then update
     - update individually
-    - link to sheet cells
+    - link to sheet cells (√)
+      - check `physical` for update
   - .
 - Misc :
   - update config-init.sh to :
@@ -25,9 +26,13 @@ Requirements:
 
 New Features:
 
+- daily cleanup of txt file (√)
 - show list of running services
-- daily cleanup of txt file
-- show uptime
+- show uptime (√)
+
+Comments:
+
+- new proj : pi-controller via sheets
 
 ```
 ##Packages (list required packages & run .scripts/python-init.sh)

@@ -16,10 +16,12 @@ import json
 import os
 
 ### CONSTANTS ###
-SHEET_COLUMNS = ['number', 'physical', 'hostname', 'address', 'last ping', 'status']
+SHEET_COLUMNS = ['number', 'physical', 'hostname', 'address', 'last ping', 'uptime', 'status']
 SHEET_NUM_ROWS = 2
-SHEET_NUM_COLS = 6
+SHEET_NUM_COLS = len(SHEET_COLUMNS)
 SHEET_PING_TIMEOUT = 2
+UPTIME_VALUES = ['days', 'hours', 'minutes', 'day', 'hour', 'minute']
+LAST_COL = chr(ord('A') + SHEET_NUM_COLS - 1)
 
 def getDecrypted(secretKey):
     # check if secretKey exists
@@ -75,10 +77,13 @@ def checkWorksheetExists(wb, name):
     return name in getWorksheetTitles(wb)
 
 def generatePayload(number, name, now):
-    hostname, physical, address = name.split('_')
+    hostname, physical, address, uptime = name.split('_')
+    for value in UPTIME_VALUES:
+        uptime = uptime.replace(value, value[0])
+
     return [
         SHEET_COLUMNS,
-        [number, physical+'   ', hostname+'   ', address, now, f'=if(E{SHEET_NUM_ROWS} > now()-time(0, {SHEET_PING_TIMEOUT}, 0), "ok", "no")']
+        [number, physical+'   ', hostname+'   ', address, now, uptime, f'=if(E{SHEET_NUM_ROWS} > now()-time(0, {SHEET_PING_TIMEOUT}, 0), "ok", "no")']
     ]
 
 def autoResizeColumn(wb, sheet):
@@ -108,8 +113,8 @@ def addConditionalFormatting(wb, sheet):
         "sheetId": sheet._properties['sheetId'],
         "startRowIndex": 1,
         "endRowIndex": 100,
-        "startColumnIndex": 5,
-        "endColumnIndex": 6,
+        "startColumnIndex": SHEET_NUM_COLS-1,
+        "endColumnIndex": SHEET_NUM_COLS,
     }
     # check if conditional format exists
     if checkRequiredConditionalFormat(wb):
@@ -168,7 +173,7 @@ def addConditionalFormatting(wb, sheet):
         }]
     })
 
-# update A2-F2
+# update A<>-LAST_COL<>
 def updateSummary(wb, name):
     summarySheet = newWorksheet(wb, 'Summary')
     # check for existing entries
@@ -177,9 +182,9 @@ def updateSummary(wb, name):
         if name in map(lambda x: x['physical'].strip(), records):
             print(f'record exists for {name}')
             return summarySheet
-        cellRange = f'A{SHEET_NUM_ROWS+len(records)}:F{SHEET_NUM_ROWS+len(records)}'
+        cellRange = f'A{SHEET_NUM_ROWS+len(records)}:{LAST_COL}{SHEET_NUM_ROWS+len(records)}'
     else:
-        cellRange = f'A{SHEET_NUM_ROWS}:F{SHEET_NUM_ROWS}'
+        cellRange = f'A{SHEET_NUM_ROWS}:{LAST_COL}{SHEET_NUM_ROWS}'
     print(f'creating new record for {name}')
     cells = summarySheet.range(cellRange)
     for cell in cells:
