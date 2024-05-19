@@ -19,7 +19,11 @@ address=`cmd.exe /c netsh interface ip show address "Wi-Fi" | grep "IP A" | sed 
 else
 # linux
 physical=`/usr/sbin/ifconfig -a wlan0 | grep 'ether ' | sed 's/.*ether \([^ ]*\) .*/\1/' | tr a-z A-Z`
-address=`/usr/sbin/ifconfig -a wlan0 | grep 'inet ' | sed 's/.*inet \([^ ]*\) .*/\1/'`
+    if [[ `/usr/sbin/ifconfig -a eth0 | grep 'inet '` ]]; then
+    address=`/usr/sbin/ifconfig -a eth0 | grep 'inet ' | sed 's/.*inet \([^ ]*\) .*/\1/'`
+    else
+    address=`/usr/sbin/ifconfig -a wlan0 | grep 'inet ' | sed 's/.*inet \([^ ]*\) .*/\1/'`
+    fi
 fi
 runningSince=`uptime -p | cut -d ' ' -f2- | tr -d ' '`
 
