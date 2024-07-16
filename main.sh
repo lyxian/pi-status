@@ -21,6 +21,13 @@ else
 if [[ `/usr/sbin/ifconfig -a eth0 | grep 'inet '` ]]; then
 address=`/usr/sbin/ifconfig -a eth0 | grep 'inet ' | sed 's/.*inet \([^ ]*\) .*/\1/'`
 physical=`/usr/sbin/ifconfig -a eth0 | grep 'ether ' | sed 's/.*ether \([^ ]*\) .*/\1/' | tr a-z A-Z`
+    if [[ `/usr/sbin/ifconfig -a wlan0 | grep 'inet '` ]]; then
+        addressW=`/usr/sbin/ifconfig -a wlan0 | grep 'inet ' | sed 's/.*inet \([^ ]*\) .*/\1/'`
+        physicalW=`/usr/sbin/ifconfig -a wlan0 | grep 'ether ' | sed 's/.*ether \([^ ]*\) .*/\1/' | tr a-z A-Z`
+        runningSinceW=`uptime -p | cut -d ' ' -f2- | tr -d ' '`
+        uidW=`hostname`_${physicalW}_${addressW}_${runningSinceW}
+        python main.py $uidW `date '+%Y-%m-%dT%H:%M:%S'`
+    fi
 else
 address=`/usr/sbin/ifconfig -a wlan0 | grep 'inet ' | sed 's/.*inet \([^ ]*\) .*/\1/'`
 physical=`/usr/sbin/ifconfig -a wlan0 | grep 'ether ' | sed 's/.*ether \([^ ]*\) .*/\1/' | tr a-z A-Z`
