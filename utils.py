@@ -9,6 +9,10 @@
 # - update summary sheet (.acell/.arange: notation) (.cell/.range: row, col)
 # - .
 
+# == ISSUES ==
+# > checkWorksheetExists FAILING (no physical for eth0) -> more sheets created -> cannot fetch API + more sheets created -> ..
+#   - ConnectionResetError: [Errno 104] Connection reset by peer
+
 from oauth2client.service_account import ServiceAccountCredentials
 from cryptography.fernet import Fernet
 import gspread
@@ -50,6 +54,11 @@ def spreadSheetClient(googleCredentials):
 
 def openWorkbookByName(client, name):
     return client.open(name)
+
+def delWorksheet(wb, name):
+    if checkWorksheetExists(wb, name):
+        print(f'deleting existing worksheet - {name}')
+        wb.del_worksheet(name)
 
 def newWorksheet(wb, name):
     if checkWorksheetExists(wb, name):
@@ -103,7 +112,11 @@ def autoResizeColumn(wb, sheet):
 def checkRequiredConditionalFormat(wb):
     summarySheet = next(filter(lambda x: x['properties']['title'] == 'Summary', wb.fetch_sheet_metadata()['sheets']))
     if 'conditionalFormats' in summarySheet:
-        checkValues = [conditonalFormat['booleanRule']['condition']['values'][0]['userEnteredValue'] for conditonalFormat in summarySheet['conditionalFormats']]
+        try:
+            checkValues = [conditonalFormat['booleanRule']['condition']['values'][0]['userEnteredValue'] for conditonalFormat in summarySheet['conditionalFormats']]
+        except Exception as e:
+            print(e)
+            return True
         if {'no', 'ok'} == set(checkValues):
             return True
     return False

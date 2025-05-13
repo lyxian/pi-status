@@ -41,7 +41,7 @@ oauth2client==4.1.3
 gspread==3.7.0
 pendulum==2.1.2
 requests==2.28.1
-pyyaml==6.0
+pyyaml==5.3
 flask==2.2.2
 pytest==7.1.2
 ##Packages
